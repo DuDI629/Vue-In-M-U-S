@@ -1,0 +1,234 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="author" content="IOT2Pay Team">
+    <meta name="copyright" content="IOT2Pay">
+    <title>vue 增 删 改 查</title>
+    <link href="./image/iconfont.ico" rel="icon">
+    <link href="./css/index.css" rel="stylesheet">
+    <script src="./js/vue.js"></script>
+    <script src="./js/index.js"></script>
+    <script src="https://s3.pstatp.com/cdn/expire-1-M/jquery/3.3.1/jquery.min.js"></script>
+</head>
+<body>
+    <div id="contart">
+        <h1>vue 增 删 改 查</h1>
+        <div class="contart-content">
+            <div slot="header" class="el-card__header" >
+                <div style="width: 240px;" >
+                    <input @input="input" v-model="keyword"  type="text"   placeholder="请输入关键词" class="el-input__inner" style="height: 40px;">
+                </div>
+                <button style="margin-left: 20px; " type="button" class="el-button el-button--small el-button--primary" @click="Addlist('新增')"><span>新增</span></button>
+
+                <button style="margin-left: 20px;" type="button" class="el-button el-button--small el-button--primary" @click="Select"><span>查询</span></button>
+            </div>
+            <table cellspacing="0" cellpadding="0"  class="el-table__header" >
+                <colgroup>
+                    <col name="el-table_2_column_4" width="180">
+                    <col name="el-table_2_column_5" width="180">
+                    <col name="el-table_2_column_6" width="300">
+                    <col name="el-table_2_column_7" width="300">
+                </colgroup>
+            <thead class="has-gutter">
+                <tr class="">
+                    <th colspan="1" rowspan="1" class="el-table_2_column_4     is-leaf">
+                        <div class="cell">日期</div>
+                    </th>
+                    <th colspan="1" rowspan="1" class="el-table_2_column_5     is-leaf">
+                        <div class="cell">姓名</div>
+                    </th>
+                    <th colspan="1" rowspan="1" class="el-table_2_column_6     is-leaf">
+                        <div class="cell">地址</div>
+                    </th>
+                    <th colspan="1" rowspan="1" class="el-table_2_column_7     is-leaf">
+                        <div class="cell">操作</div>
+                    </th>
+                </tr>
+            </thead>
+        </table>
+        <table cellspacing="0" cellpadding="0"  class="el-table__header" >
+            <colgroup>
+                <col name="el-table_2_column_4" width="180">
+                <col name="el-table_2_column_5" width="180">
+                <col name="el-table_2_column_6" width="300">
+                <col name="el-table_2_column_7" width="300">
+            </colgroup><thead class="has-gutter">
+            <tr class="" v-for="(item,index) in list" :key="index">
+                <td colspan="1" rowspan="1" class="el-table_2_column_4     is-leaf">
+                    <input class="cell" :disabled="item.status" v-model="item.time">
+                </td>
+                <td colspan="1" rowspan="1" class="el-table_2_column_5     is-leaf">
+                    <input class="cell" :disabled="item.status" v-model="item.name">
+                </td>
+                <td colspan="1" rowspan="1" class="el-table_2_column_6     is-leaf">
+                    <input class="cell" :disabled="item.status" v-model="item.address">
+                </td>
+                <td colspan="1" rowspan="1" class="el-table_2_column_7     is-leaf">
+                    <!-- <button v-if="!item.status" type="button" class="el-button el-button--small el-button--primary" @click="item.status = true" ><span>确定</span></button>
+                    <button v-if="!item.status" type="button" class="el-button el-button--small el-button--primary" @click="Cancel(index)" ><span>取消</span></button> -->
+                    <button type="button" class="el-button el-button--small el-button--primary" @click="MOdif(index)" ><span>修改</span></button>
+                    <button type="button" class="el-button el-button--small el-button--warning" @click="Delect(index)"><span>删除</span></button>
+                </td>
+            </tr>
+            </thead>
+        </table>
+        </div>
+        <!-- v-bind:class="{'roll-out-blurred-bottom':!eldialog}" -->
+        <div v-if="eldialog" class="el-dialog__wrapper scale-in-center " v-on:click.prevent.self="CancelDialog()"  v-bind:style="{'z-index':zIndex}">
+            <div class="el-dialog" style="margin-top: 15vh;" v-bind:style="{'z-index':zIndex+1}" >
+                <div class="el-dialog__header">
+                    <span class="el-dialog__title">{{title}}</span>
+                    <button type="button" aria-label="Close" class="el-dialog__headerbtn" @click.stop="CancelDialog()">
+                       <label>关闭</label>
+                    </button>
+                </div>
+                <div class="demo-input-suffix ">
+                    <label class="el-form-item__label">日期</label>
+                    <div class="el-input "> 
+                        <input v-model="itemdata.time" type="text" autocomplete="off" placeholder="请输入日期" class="el-input__inner">
+                    </div>
+                </div>
+                <div class="demo-input-suffix ">
+                    <label class="el-form-item__label">联系名字</label>
+                    <div class="el-input "> 
+                        <input v-model="itemdata.name" type="text" autocomplete="off" placeholder="请输入联系名字" class="el-input__inner">
+                    </div>
+                </div>
+                <div class="demo-input-suffix ">
+                    <label class="el-form-item__label">地址</label>
+                    
+                    <div class="el-input "> 
+                        <input v-model="itemdata.address" type="text" autocomplete="off" placeholder="请输入地址" class="el-input__inner">
+                    </div>
+                </div>
+                <div class="el-dialog__footer">
+                    <div class="dialog-footer">
+                        <button type="button" class="el-button el-button--default" @click.stop="CancelDialog()"><!----><!---->
+                            <span>取 消</span>
+                        </button> 
+                        <button type="button" class="el-button el-button--primary" @click.stop="Determine()"><!----><!---->
+                            <span>确 定</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div v-if="eldialog" @click.stop="CancelDialog()" class="v-modal scale-in-center" v-bind:class="{'roll-out-blurred-bottom':!eldialog}" tabindex="0" :style="{'z-index':zIndexs}"></div>
+    </div>
+</body>
+</html>
+<script>
+    var app = new Vue({
+        el:"#contart",
+        data:{
+            message:"Hellow word",
+            list:[
+                {time:"2016-05-02",name:"王小虎",address:"上海市普陀区金沙江路 1518 弄",status:true},
+                {time:"2016-05-02",name:"王小虎",address:"上海市普陀区金沙江路 1518 弄",status:true},
+                {time:"2016-05-02",name:"王大虎",address:"上海市普陀区金沙江路 1518 弄",status:true},
+                {time:"2016-05-02",name:"王小虎",address:"上海市普陀区金沙江路 1518 弄",status:true},
+            ],
+            Historylist:[],
+            keyword:"",
+            zIndex:0 , //最大索引值
+            zIndexs:0,
+            eldialog:false,
+            title:"新增",
+
+            itemdata:{
+                time:" ",
+                name:" ",
+                address:" ",
+                status:true
+            },
+            listindex:0,
+        },
+        mounted(){
+            this.zIndex = this.getMaxZIndex()
+            this.Historylist = JSON.parse(JSON.stringify(this.list));
+
+        },
+        methods:{
+            Addlist(item){
+                this.eldialog = true;
+                this.zIndex = this.getMaxZIndex()
+                if(item == '新增'){
+                    this.title = "新增"
+                    let data = {
+                        time:" ",
+                        name:" ",
+                        address:" ",
+                        status:true
+                    }
+                    this.itemdata = data
+                }else{
+                    this.title = "修改"
+
+
+                } 
+            },
+            Determine(){
+                this.eldialog = false
+                if(this.title == '新增'){
+                    this.list.push(this.itemdata)
+                }else{
+                    this.list[this.listindex] = this.itemdata
+                }
+            },
+            CancelDialog(event){
+                this.eldialog = false;
+                
+                
+                
+            },
+             getMaxZIndex(){
+	            let arr = [...document.all].map(e => +window.getComputedStyle(e).zIndex || 0);
+                this.zIndexs = Math.max(...arr);
+	            return arr.length ? Math.max(...arr) + 1 : 0
+            },
+            Cancel(item){
+                
+                this.list = this.Historylist
+                
+                this.list[item].status  = true
+            },
+            Delect(item){
+                this.list.splice(item,1);
+            },
+            MOdif(item){
+                this.Historylist = JSON.parse(JSON.stringify(this.list[item]));
+             
+                this.itemdata = this.Historylist;
+                this.listindex = item
+                this.Addlist('修改');
+            },
+            Select(item){
+                if(this.keyword != ''){
+                    let list = this.list.filter(el=>
+                        {
+                            return el.name.includes(this.keyword)
+                        })
+                    this.list = list
+                }else{
+
+                    this.list = this.Historylist
+
+                    // setTimeout(()=>{
+                    //     alert("请输入搜索关键字");
+                    // },2000)
+                    
+                }
+                
+            },
+            input(e){
+              
+            }
+        }
+    })
+</script>
